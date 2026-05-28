@@ -362,6 +362,7 @@ export default function App() {
                       }
                       setUsers([...users, { ...newUser, id: Date.now().toString() }]);
                       setNewUser({ username: '', password: '', role: 'user' });
+                      alert('Account successfully saved.');
                    }} className="space-y-4">
                       <div>
                          <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Username</label>
@@ -414,7 +415,10 @@ export default function App() {
                                            alert('Cannot delete yourself while logged in.');
                                            return;
                                         }
-                                        setUsers(users.filter((us:any) => us.id !== u.id));
+                                        if (window.confirm('Are you sure you want to delete this user?')) {
+                                           setUsers(users.filter((us:any) => us.id !== u.id));
+                                           alert('User profile has been updated and saved.');
+                                        }
                                      }}
                                      className="text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all p-2 rounded-lg"
                                      title="Delete User"
