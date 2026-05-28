@@ -80,6 +80,18 @@ export default function App() {
   const [activeView, setActiveView] = useState('computation');
   const [newUser, setNewUser] = useState({ username: '', password: '', role: 'user' });
 
+  // MODIFICATION START: State and Logic for Printable View
+  const [selectedReportToPrint, setSelectedReportToPrint] = useState<any>(null);
+
+  const handlePrintReport = (report: any) => {
+    setSelectedReportToPrint(report);
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => setSelectedReportToPrint(null), 100);
+    }, 100);
+  };
+  // MODIFICATION END
+
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -165,117 +177,22 @@ export default function App() {
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    let rowsHtml = '';
+    if (grandTotal === 0) {
+        alert('Please add at least one fixture or tank to compute.');
+        return;
+    }
     
-    FIXTURES.forEach(f => {
-       const qty = parseInt(fixtureQuants[f.id] || '0', 10) || 0;
-       if (qty > 0) {
-          const sub = qty * f.cost;
-          rowsHtml += `
-            <tr>
-              <td>${f.label}</td>
-              <td class="text-center">${qty}</td>
-              <td class="text-right">${formatPeso(f.cost)}</td>
-              <td class="text-right font-semibold">${formatPeso(sub)}</td>
-            </tr>
-          `;
-       }
-    });
-
-    TANKS.forEach(t => {
-       const qtyStr = tankQuants[t.id];
-       const qty = parseFloat(qtyStr || '0') || 0;
-       if (qty > 0) {
-          const sub = computeCubicMeterCost(qty);
-          rowsHtml += `
-             <tr class="bg-slate-50">
-               <td>${t.label} (Tank)</td>
-               <td class="text-center">${qty} m³</td>
-               <td class="text-right text-slate-500 italic">Formula Base</td>
-               <td class="text-right font-semibold">${formatPeso(sub)}</td>
-             </tr>
-          `;
-       }
-    });
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Plumbing Computation Report - ${details.name || 'Untitled'}</title>
-          <style>
-             body { font-family: system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; padding: 20mm; background: white; }
-             @page { size: auto; margin: 0mm; }
-             .header { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; text-align: left; }
-             h1 { margin: 0; color: #0f172a; font-size: 28px; letter-spacing: -0.025em; }
-             .subtitle { color: #64748b; margin-top: 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-             .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; background: #f8fafc; padding: 20px; border-radius: 12px; }
-             .detail-item { font-size: 14px; }
-             .detail-label { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 12px; margin-bottom: 4px; }
-             .detail-value { color: #0f172a; font-weight: 500; font-size: 16px; }
-             table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-             th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 16px; text-align: left; }
-             th { background-color: #f1f5f9; color: #475569; font-weight: 600; }
-             .text-right { text-align: right; }
-             .text-center { text-align: center; }
-             .font-semibold { font-weight: 600; }
-             .italic { font-style: italic; }
-             .bg-slate-50 { background-color: #f8fafc; }
-             .total-row td { font-weight: bold; font-size: 18px; color: #0f172a; background-color: #f1f5f9; border-top: 2px solid #cbd5e1; }
-          </style>
-        </head>
-        <body>
-            <div class="header">
-               <img src="${new URL(logo1, window.location.href).href}" alt="Pasay Logo" style="width: 80px; height: 80px; object-fit: contain;" />
-               <div>
-                  <h1>Plumbing Computation Report</h1>
-                  <div class="subtitle">City of Pasay</div>
-               </div>
-            </div>
-            
-            <div class="details-grid">
-               <div class="detail-item"><div class="detail-label">Applicant Name</div><div class="detail-value">${details.name || 'N/A'}</div></div>
-               <div class="detail-item"><div class="detail-label">Project Location</div><div class="detail-value">${details.location || 'N/A'}</div></div>
-               <div class="detail-item"><div class="detail-label">BP Number</div><div class="detail-value">${details.bpNumber || 'N/A'}</div></div>
-               <div class="detail-item"><div class="detail-label">Project Title</div><div class="detail-value">${details.projectTitle || 'N/A'}</div></div>
-               <div class="detail-item"><div class="detail-label">Computed By</div><div class="detail-value">${currentUser?.username || 'N/A'}</div></div>
-            </div>
-
-            <table>
-               <thead>
-                  <tr>
-                     <th>Item Description</th>
-                     <th class="text-center">Quantity</th>
-                     <th class="text-right">Unit / Basis Cost</th>
-                     <th class="text-right">Subtotal</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  ${rowsHtml || '<tr><td colspan="4" class="text-center" style="padding: 32px; color: #94a3b8;">No fixtures or tanks included in this computation.</td></tr>'}
-                  <tr class="total-row">
-                     <td colspan="3" class="text-right">Grand Total</td>
-                     <td class="text-right" style="color: #059669;">${formatPeso(grandTotal)}</td>
-                  </tr>
-               </tbody>
-            </table>
-            
-            <div style="margin-top: 60px; text-align: center; color: #94a3b8; font-size: 12px;">
-               Generated by Plumbing Computation App • ${new Date().toLocaleDateString()}
-            </div>
-
-            <script>
-              setTimeout(() => {
-                 window.print();
-                 window.close();
-              }, 250);
-            </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    // Use the inline printable architecture
+    const reportData = {
+        id: 'DRAFT-' + Date.now().toString().slice(-4),
+        date: new Date().toISOString(),
+        computedBy: currentUser?.username || 'Unknown',
+        details,
+        fixtureQuants,
+        tankQuants,
+        grandTotal
+    };
+    handlePrintReport(reportData);
   };
 
   const hasItems = fixtureTotal > 0 || tankTotal > 0;
@@ -333,6 +250,206 @@ export default function App() {
          </div>
       </div>
     );
+  }
+
+  if (activeView === 'assessments') {
+     // AUTHENTICATION START (RBAC)
+     if (currentUser?.role !== 'superadmin') {
+         return (
+             <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+                 <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-sm w-full border border-red-200">
+                     <Lock className="text-red-500 mx-auto mb-4" size={48} />
+                     <h2 className="text-2xl font-bold text-slate-800 mb-2">Unauthorized Access</h2>
+                     <p className="text-slate-600 mb-6">This section is strictly restricted to Super Admin users.</p>
+                     <button onClick={() => setActiveView('computation')} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 w-full transition-colors">Return to Dashboard</button>
+                 </div>
+             </div>
+         );
+     }
+     // AUTHENTICATION END
+
+     const reports = JSON.parse(localStorage.getItem('plumbing_reports') || '[]');
+
+     return (
+        <>
+        <style>{`
+          @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            @page { size: letter; margin: 15mm; }
+            body { background: white; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          }
+          @media screen {
+            .print-only { display: none !important; }
+          }
+        `}</style>
+        
+        {/* The normal UI that gets hidden on print */}
+        <div className="min-h-screen bg-slate-100 py-6 md:py-12 px-4 selection:bg-blue-200 no-print">
+          <div className="max-w-5xl mx-auto bg-white rounded-[2rem] shadow-2xl overflow-hidden ring-1 ring-slate-200">
+              <div className="bg-[#e95191] p-8 text-white relative overflow-hidden">
+                 <button onClick={() => setActiveView('computation')} className="absolute top-6 left-6 text-pink-100 hover:text-white flex items-center gap-2 transition-colors font-medium">
+                    <ArrowLeft size={18} /> Back to Dashboard
+                 </button>
+                 <div className="text-center mt-6">
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">Submitted Assessments</h1>
+                    <p className="text-pink-100 text-sm">Super Admin Tracking Portal</p>
+                 </div>
+              </div>
+              
+              <div className="p-8">
+                 <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <table className="w-full text-left border-collapse">
+                       <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs">Project Name</th>
+                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs">Date Submitted</th>
+                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs border-l border-slate-200">Applicant Name</th>
+                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs text-right border-l border-slate-200">Total Amount</th>
+                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs text-center border-l border-slate-200">Status</th>
+                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs text-right">Actions</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-slate-100">
+                          {reports.length === 0 ? (
+                             <tr>
+                                <td colSpan={6} className="py-8 text-center text-slate-500 italic font-medium">No assessments submitted yet.</td>
+                             </tr>
+                          ) : (
+                             reports.map((report: any) => (
+                                <tr key={report.id} className="hover:bg-slate-50 transition-colors">
+                                   <td className="py-4 px-5 font-bold text-slate-800 text-sm">{report.details.projectTitle || 'Untitled Project'}</td>
+                                   <td className="py-4 px-5 text-sm font-medium text-slate-700">{new Date(report.date).toLocaleDateString()}</td>
+                                   <td className="py-4 px-5 text-sm font-medium text-slate-700 border-l border-slate-100">{report.details.name || 'N/A'}</td>
+                                   <td className="py-4 px-5 font-bold text-emerald-600 text-right text-lg border-l border-slate-100">{formatPeso(report.grandTotal)}</td>
+                                   <td className="py-4 px-5 text-center border-l border-slate-100">
+                                      <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">
+                                         Submitted
+                                      </span>
+                                   </td>
+                                   <td className="py-4 px-5 text-right">
+                                      {/* MODIFICATION START (PRINT BUTTON) */}
+                                      <button 
+                                         onClick={() => handlePrintReport(report)}
+                                         className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-colors font-semibold text-sm border border-blue-200 shadow-sm"
+                                      >
+                                         <Printer size={14} /> View Printable
+                                      </button>
+                                      {/* MODIFICATION END */}
+                                   </td>
+                                </tr>
+                             ))
+                          )}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+          </div>
+        </div>
+
+        {/* MODIFICATION START: PRINTABLE ARCHITECTURE */}
+        {selectedReportToPrint && (
+           <div className="print-only fixed inset-0 z-[100] text-slate-900 p-8 font-sans bg-white overflow-hidden">
+              <div className="max-w-4xl mx-auto">
+                 <div className="flex border-b-[3px] border-slate-300 pb-6 mb-6 items-center gap-6">
+                    <img src={logo1} alt="Pasay Logo" className="w-24 h-24 object-contain" />
+                    <div>
+                       <h1 className="text-3xl font-bold uppercase tracking-tight text-slate-900">Official Plumbing Assessment</h1>
+                       <p className="text-slate-600 font-bold uppercase tracking-widest text-sm mt-1">City of Pasay</p>
+                       <p className="text-slate-500 text-sm mt-1 font-mono">Assessment ID: {selectedReportToPrint.id}</p>
+                    </div>
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Applicant Name</p>
+                       <p className="font-semibold text-lg text-slate-900">{selectedReportToPrint.details.name || 'N/A'}</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Project Title</p>
+                       <p className="font-semibold text-lg text-slate-900">{selectedReportToPrint.details.projectTitle || 'N/A'}</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Location</p>
+                       <p className="font-semibold text-lg text-slate-900">{selectedReportToPrint.details.location || 'N/A'}</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">BP Number</p>
+                       <p className="font-semibold text-lg text-slate-900 font-mono">{selectedReportToPrint.details.bpNumber || 'N/A'}</p>
+                    </div>
+                 </div>
+
+                 <table className="w-full text-left border-collapse mb-8 border border-slate-200">
+                    <thead className="bg-slate-100">
+                       <tr>
+                          <th className="py-3 px-4 font-bold text-xs text-slate-700 uppercase tracking-widest border-b border-slate-300">Description</th>
+                          <th className="py-3 px-4 font-bold text-xs text-slate-700 uppercase tracking-widest border-b border-slate-300 text-center">Qty</th>
+                          <th className="py-3 px-4 font-bold text-xs text-slate-700 uppercase tracking-widest border-b border-slate-300 text-right">Cost/Basis</th>
+                          <th className="py-3 px-4 font-bold text-xs text-slate-700 uppercase tracking-widest border-b border-slate-300 text-right">Subtotal</th>
+                       </tr>
+                    </thead>
+                    <tbody>
+                       {FIXTURES.map(f => {
+                           const qtyStr = selectedReportToPrint.fixtureQuants[f.id];
+                           const qty = parseInt(qtyStr || '0', 10) || 0;
+                           if (qty > 0) {
+                              const sub = qty * f.cost;
+                              return (
+                                 <tr key={f.id}>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm font-medium text-slate-800">{f.label}</td>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm text-center font-medium text-slate-800">{qty}</td>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm text-right text-slate-600">{formatPeso(f.cost)}</td>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm text-right font-bold text-slate-800">{formatPeso(sub)}</td>
+                                 </tr>
+                              );
+                           }
+                           return null;
+                       })}
+                       {TANKS.map(t => {
+                           const qtyStr = selectedReportToPrint.tankQuants[t.id];
+                           const qty = parseFloat(qtyStr || '0') || 0;
+                           if (qty > 0) {
+                              const sub = computeCubicMeterCost(qty);
+                              return (
+                                 <tr key={t.id}>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm font-medium text-slate-800">{t.label} (Tank)</td>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm text-center font-medium text-slate-800">{qty} m³</td>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm text-right italic text-slate-500">Formula Base</td>
+                                    <td className="py-2.5 px-4 border-b border-slate-200 text-sm text-right font-bold text-slate-800">{formatPeso(sub)}</td>
+                                 </tr>
+                              );
+                           }
+                           return null;
+                       })}
+                       <tr className="bg-slate-100">
+                           <td colSpan={3} className="py-4 px-4 text-right font-bold uppercase tracking-widest text-slate-700 border-t-[3px] border-slate-300">Grand Total</td>
+                           <td className="py-4 px-4 text-right font-bold text-slate-900 border-t-[3px] border-slate-300 text-lg">{formatPeso(selectedReportToPrint.grandTotal)}</td>
+                       </tr>
+                    </tbody>
+                 </table>
+
+                 <div className="mt-16 pt-8">
+                    <div className="grid grid-cols-2 gap-16">
+                       <div>
+                          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-12">Computed By</p>
+                          <div className="border-b-[2px] border-slate-900 w-64 mb-3"></div>
+                          <p className="font-bold text-slate-900 text-lg">{selectedReportToPrint.computedBy}</p>
+                          <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Authorized Assessor</p>
+                       </div>
+                       <div>
+                          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-12">Approved By</p>
+                          <div className="border-b-[2px] border-slate-900 w-64 mb-3"></div>
+                          <p className="font-bold text-slate-900 text-lg">&nbsp;</p>
+                          <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">City Engineering Office</p>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        )}
+        {/* MODIFICATION END */}
+        </>
+     );
   }
 
   if (activeView === 'accounts' && currentUser?.role === 'superadmin') {
@@ -445,12 +562,20 @@ export default function App() {
         <div className="bg-[#e95191] p-8 md:p-12 text-center relative overflow-hidden">
           <div className="absolute top-6 right-6 flex gap-3 z-20">
              {currentUser?.role === 'superadmin' && (
-                <button 
-                   onClick={() => setActiveView('accounts')}
-                   className="bg-[#d8407f] hover:bg-[#c3336d] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-[#d8407f]"
-                >
-                   <Users size={16} /> Accounts
-                </button>
+                <>
+                   <button 
+                      onClick={() => setActiveView('assessments')}
+                      className="bg-[#d8407f] hover:bg-[#c3336d] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-[#d8407f]"
+                   >
+                      <FileText size={16} /> Reports
+                   </button>
+                   <button 
+                      onClick={() => setActiveView('accounts')}
+                      className="bg-[#d8407f] hover:bg-[#c3336d] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors border border-[#d8407f]"
+                   >
+                      <Users size={16} /> Accounts
+                   </button>
+                </>
              )}
              <button 
                 onClick={() => {
