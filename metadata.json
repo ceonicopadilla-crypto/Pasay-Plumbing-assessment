@@ -1,6 +1,8 @@
 {
   "name": "Plumbing Computation App",
-  "description": "A professional plumbing computation and assessment system.",
+  "description": "Plumbing computation and assessment system",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
