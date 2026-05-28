@@ -207,10 +207,11 @@ export default function App() {
         <head>
           <title>Plumbing Computation Report - ${details.name || 'Untitled'}</title>
           <style>
-             body { font-family: system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; padding: 40px; background: white; }
-             .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+             body { font-family: system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; padding: 20mm; background: white; }
+             @page { size: auto; margin: 0mm; }
+             .header { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; text-align: left; }
              h1 { margin: 0; color: #0f172a; font-size: 28px; letter-spacing: -0.025em; }
-             .subtitle { color: #64748b; margin-top: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+             .subtitle { color: #64748b; margin-top: 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
              .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; background: #f8fafc; padding: 20px; border-radius: 12px; }
              .detail-item { font-size: 14px; }
              .detail-label { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 12px; margin-bottom: 4px; }
@@ -228,7 +229,11 @@ export default function App() {
         </head>
         <body>
             <div class="header">
-               <h1>Plumbing Computation Report</h1>
+               <img src="${new URL(logo1, window.location.href).href}" alt="Pasay Logo" style="width: 80px; height: 80px; object-fit: contain;" />
+               <div>
+                  <h1>Plumbing Computation Report</h1>
+                  <div class="subtitle">City of Pasay</div>
+               </div>
             </div>
             
             <div class="details-grid">
