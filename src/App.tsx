@@ -5,6 +5,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Printer, CheckCircle, Droplet, LayoutDashboard, Calculator, Hash, MapPin, User, FileText, Lock, LogOut, Users, UserPlus, Trash2, ArrowLeft } from 'lucide-react';
+import logo1 from './assets/images/regenerated_image_1779944737343.png';
+import logo2 from './assets/images/regenerated_image_1779944738798.png';
 
 const FIXTURES = [
   { id: 'water_closet', label: 'Water Closet', cost: 7 },
@@ -227,7 +229,6 @@ export default function App() {
         <body>
             <div class="header">
                <h1>Plumbing Computation Report</h1>
-               <div class="subtitle">Official Assessment</div>
             </div>
             
             <div class="details-grid">
@@ -283,7 +284,7 @@ export default function App() {
                      <Lock size={80} />
                  </div>
                  <div className="relative z-10 flex flex-col items-center">
-                     <img src="https://upload.wikimedia.org/wikipedia/en/e/e3/Ph_seal_pasay.png" alt="City of Pasay Logo" className="h-20 w-20 object-contain mb-4 drop-shadow-md" />
+                     <img src={logo1} alt="City of Pasay Logo" className="h-20 w-20 object-contain mb-4 drop-shadow-md" />
                      <h2 className="text-3xl font-bold text-white tracking-tight">Admin Login</h2>
                      <p className="text-pink-100 mt-2 text-sm font-medium">Access local management system</p>
                  </div>
@@ -456,7 +457,7 @@ export default function App() {
              <Droplet size={120} />
           </div>
           <div className="relative z-10 flex flex-col items-center">
-             <img src="https://upload.wikimedia.org/wikipedia/en/e/e3/Ph_seal_pasay.png" alt="City of Pasay Logo" className="h-28 w-28 object-contain mb-5 drop-shadow-xl" />
+             <img src={logo2} alt="City of Pasay Logo" className="h-28 w-28 object-contain mb-5 drop-shadow-xl" />
              <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Plumbing Computation</h1>
              <p className="text-pink-100 mt-3 text-lg font-medium">Professional computation and assessment system</p>
           </div>
