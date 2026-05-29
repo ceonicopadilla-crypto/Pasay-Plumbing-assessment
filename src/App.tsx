@@ -71,10 +71,19 @@ export default function App() {
         { username: 'JVTecson', password: 'Engr001', role: 'user', assessorName: 'Engr.Tecson' },
         { username: 'BDelmo', password: 'Engr002', role: 'user', assessorName: 'Engr.Delmo' },
         { username: 'MSantos', password: 'Eval001', role: 'user', assessorName: 'M.Santos' },
-        { username: 'LSorro', password: 'Eval001', role: 'user', assessorName: 'L.Sorro' },
+        { username: 'LSoro', password: 'Eval001', role: 'user', assessorName: 'L.Soro' },
     ];
 
     let hasChanges = false;
+    
+    // Fix existing LSorro user
+    const lsorroIndex = parsed.findIndex((u: any) => u.username === 'LSorro');
+    if (lsorroIndex !== -1) {
+        parsed[lsorroIndex].username = 'LSoro';
+        parsed[lsorroIndex].assessorName = 'L.Soro';
+        hasChanges = true;
+    }
+
     defaultUsers.forEach((defUser, index) => {
         if (!parsed.find((u: any) => u.username === defUser.username)) {
             parsed.push({ id: `def_${index}_${Date.now()}`, ...defUser });
