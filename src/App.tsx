@@ -384,7 +384,7 @@ export default function App() {
                <div class="detail-item"><div class="detail-label">Project Location</div><div class="detail-value">${details.location || 'N/A'}</div></div>
                <div class="detail-item"><div class="detail-label">BP Number</div><div class="detail-value">${details.bpNumber || 'N/A'}</div></div>
                <div class="detail-item"><div class="detail-label">Project Title</div><div class="detail-value">${details.projectTitle || 'N/A'}</div></div>
-               <div class="detail-item"><div class="detail-label">Computed By</div><div class="detail-value">${currentUser?.username || 'N/A'}</div></div>
+               <div class="detail-item"><div class="detail-label">Computed By</div><div class="detail-value">${currentUser?.assessorName || currentUser?.username || 'N/A'}</div></div>
             </div>
 
             <table>
@@ -638,6 +638,7 @@ export default function App() {
                       <thead className="bg-slate-50 border-b border-slate-200">
                          <tr>
                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs">Username</th>
+                            <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs">Assessor Name</th>
                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs">Role</th>
                             <th className="py-4 px-5 font-semibold text-slate-600 text-sm uppercase tracking-wider text-xs text-right">Actions</th>
                          </tr>
@@ -646,6 +647,7 @@ export default function App() {
                          {users.map((u: any) => (
                             <tr key={u.id} className="hover:bg-slate-50 transition-colors">
                                <td className="py-4 px-5 font-bold text-slate-800">{u.username}</td>
+                               <td className="py-4 px-5 text-slate-600 font-medium">{u.assessorName || '—'}</td>
                                <td className="py-4 px-5">
                                   <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${u.role === 'superadmin' ? 'bg-purple-100 text-purple-700 ring-1 ring-purple-200' : 'bg-blue-100 text-blue-700 ring-1 ring-blue-200'}`}>
                                      {u.role === 'superadmin' ? 'Super Admin' : 'User'}
@@ -911,7 +913,7 @@ export default function App() {
                     <span className="text-slate-500 font-semibold uppercase tracking-wider text-xs self-center">Title</span>
                     <span className="text-slate-900 font-bold text-base truncate">{details.projectTitle || '—'}</span>
                     <span className="text-slate-500 font-semibold uppercase tracking-wider text-xs self-center">Assessor</span>
-                    <span className="text-slate-900 font-bold text-base truncate">{currentUser?.username || '—'}</span>
+                    <span className="text-slate-900 font-bold text-base truncate">{currentUser?.assessorName || currentUser?.username || '—'}</span>
                  </div>
                  
                  <h4 className="text-sm font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Item Breakdown</h4>
