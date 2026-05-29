@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Printer, CheckCircle, Droplet, LayoutDashboard, Calculator, Hash, MapPin, User, FileText, Lock, LogOut, Users, UserPlus, Trash2, ArrowLeft, Key } from 'lucide-react';
+import { Printer, CheckCircle, Droplet, LayoutDashboard, Calculator, Hash, MapPin, User, FileText, Lock, LogOut, Users, UserPlus, Trash2, ArrowLeft, Key, Edit } from 'lucide-react';
 import logo1 from './assets/images/regenerated_image_1779944737343.png';
 import logo2 from './assets/images/regenerated_image_1779944738798.png';
 
@@ -59,6 +59,80 @@ const computeCubicMeterCost = (cubicMeters: number) => {
   }
   
   return Math.max(total, 304);
+};
+
+const SimpleCalculator = () => {
+    const [display, setDisplay] = useState('0');
+    
+    const handleNum = (num: string) => {
+        if (display === '0' || display === 'Error') setDisplay(num);
+        else setDisplay(display + num);
+    };
+
+    const handleOp = (op: string) => {
+        if (display === 'Error') setDisplay('0');
+        else setDisplay(display + op);
+    };
+
+    const calculate = () => {
+        try {
+            // Safe evaluation using purely math expressions
+            const sanitized = display.replace(/[^0-9+\-*/.]/g, '');
+            // eslint-disable-next-line no-eval
+            const result = eval(sanitized);
+            setDisplay(Number.isFinite(result) ? String(result) : 'Error');
+        } catch (e) {
+            setDisplay('Error');
+        }
+    };
+
+    const clear = () => setDisplay('0');
+
+    const handleDelete = () => {
+        if (display.length > 1) {
+            setDisplay(display.slice(0, -1));
+        } else {
+            setDisplay('0');
+        }
+    };
+
+    return (
+        <div className="mt-4 p-5 bg-slate-50 rounded-2xl border border-slate-200">
+           <div className="flex items-center gap-2 mb-4">
+               <Calculator size={18} className="text-slate-600" />
+               <h4 className="font-bold text-slate-800">Quick Calculator</h4>
+           </div>
+           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden w-full max-w-xs space-y-px">
+               <div className="p-4 bg-slate-900 text-white font-mono text-xl text-right overflow-x-auto whitespace-nowrap min-h-[60px] flex items-center justify-end overflow-hidden break-all">
+                  {display}
+               </div>
+               <div className="grid grid-cols-4 gap-px bg-slate-200 p-px">
+                   <button onClick={clear} className="bg-slate-100 p-3 font-semibold text-red-500 hover:bg-slate-200 transition-colors">C</button>
+                   <button onClick={() => handleOp('/')} className="bg-slate-100 p-3 font-semibold text-slate-600 hover:bg-slate-200 transition-colors">÷</button>
+                   <button onClick={() => handleOp('*')} className="bg-slate-100 p-3 font-semibold text-slate-600 hover:bg-slate-200 transition-colors">×</button>
+                   <button onClick={() => handleDelete()} className="bg-slate-100 p-3 font-semibold text-slate-600 hover:bg-slate-200 transition-colors">⌫</button>
+                   
+                   <button onClick={() => handleNum('7')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">7</button>
+                   <button onClick={() => handleNum('8')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">8</button>
+                   <button onClick={() => handleNum('9')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">9</button>
+                   <button onClick={() => handleOp('-')} className="bg-slate-100 p-3 font-semibold text-slate-600 hover:bg-slate-200 transition-colors">−</button>
+                   
+                   <button onClick={() => handleNum('4')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">4</button>
+                   <button onClick={() => handleNum('5')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">5</button>
+                   <button onClick={() => handleNum('6')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">6</button>
+                   <button onClick={() => handleOp('+')} className="bg-slate-100 p-3 font-semibold text-slate-600 hover:bg-slate-200 transition-colors">+</button>
+                   
+                   <button onClick={() => handleNum('1')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">1</button>
+                   <button onClick={() => handleNum('2')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">2</button>
+                   <button onClick={() => handleNum('3')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">3</button>
+                   <button onClick={calculate} className="bg-blue-600 p-3 font-bold text-white hover:bg-blue-700 transition-colors row-span-2 shadow-inner">=</button>
+                   
+                   <button onClick={() => handleNum('0')} className="col-span-2 bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">0</button>
+                   <button onClick={() => handleNum('.')} className="bg-white p-3 font-semibold text-slate-800 hover:bg-slate-50 transition-colors">.</button>
+               </div>
+           </div>
+        </div>
+    );
 };
 
 export default function App() {
@@ -272,6 +346,8 @@ export default function App() {
 
   const grandTotal = fixtureTotal + tankTotal;
 
+  const [editingReportId, setEditingReportId] = useState<string | null>(null);
+
   const handleSubmit = () => {
     if (!details.name || !details.location || !details.bpNumber) {
         alert('Please fill out the applicant name, location, and BP number before submitting.');
@@ -284,7 +360,7 @@ export default function App() {
     }
 
     const reportData = {
-        id: Date.now().toString(),
+        id: editingReportId || Date.now().toString(),
         date: new Date().toISOString(),
         computedBy: currentUser?.assessorName || currentUser?.username || 'Unknown',
         details,
@@ -296,12 +372,22 @@ export default function App() {
     };
 
     const existingReports = JSON.parse(localStorage.getItem('plumbing_reports') || '[]');
-    existingReports.push(reportData);
+    if (editingReportId) {
+        const index = existingReports.findIndex((r: any) => r.id === editingReportId);
+        if (index !== -1) {
+            existingReports[index] = reportData;
+        } else {
+            existingReports.push(reportData);
+        }
+    } else {
+        existingReports.push(reportData);
+    }
     localStorage.setItem('plumbing_reports', JSON.stringify(existingReports));
     
-    alert('Computation successfully saved to local records!');
+    alert(editingReportId ? 'Computation successfully updated!' : 'Computation successfully saved to local records!');
     
     // reset form
+    setEditingReportId(null);
     setDetails({ name: '', location: '', bpNumber: '', projectTitle: '' });
     setFixtureQuants({});
     setTankQuants({});
@@ -553,8 +639,20 @@ export default function App() {
                                          Submitted
                                       </span>
                                    </td>
-                                   <td className="py-4 px-5 text-right">
+                                   <td className="py-4 px-5 text-right flex justify-end gap-2">
                                       {/* MODIFICATION START (PRINT BUTTON) */}
+                                      <button 
+                                         onClick={() => {
+                                            setEditingReportId(report.id);
+                                            setDetails(report.details);
+                                            setFixtureQuants(report.fixtureQuants || {});
+                                            setTankQuants(report.tankQuants || {});
+                                            setActiveView('computation');
+                                         }}
+                                         className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-lg transition-colors font-semibold text-sm border border-amber-200 shadow-sm"
+                                      >
+                                         <Edit size={14} /> Edit
+                                      </button>
                                       <button 
                                          onClick={() => handlePrintReport(report)}
                                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-colors font-semibold text-sm border border-blue-200 shadow-sm"
@@ -889,6 +987,9 @@ export default function App() {
                        </ul>
                     </div>
                  </div>
+
+                 {/* Built In Calculator */}
+                 <SimpleCalculator />
               </section>
           </div>
         </div>
@@ -967,8 +1068,18 @@ export default function App() {
                  <div className="flex flex-col sm:flex-row gap-4 relative z-10">
                     <button onClick={handleSubmit} className="flex-1 bg-[#e95191] hover:bg-[#d8407f] text-white px-6 py-4 rounded-2xl font-extrabold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group ring-2 ring-transparent">
                        <CheckCircle size={22} className="group-hover:scale-110 transition-transform" /> 
-                       Submit
+                       {editingReportId ? 'Update Report' : 'Submit'}
                     </button>
+                    {editingReportId && (
+                       <button onClick={() => {
+                          setEditingReportId(null);
+                          setDetails({ name: '', location: '', bpNumber: '', projectTitle: '' });
+                          setFixtureQuants({});
+                          setTankQuants({});
+                       }} className="bg-slate-500 hover:bg-slate-600 text-white px-6 py-4 rounded-2xl font-extrabold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group">
+                          Cancel
+                       </button>
+                    )}
                     <button onClick={handlePrint} className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-4 rounded-2xl font-extrabold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group ring-2 ring-transparent">
                        <Printer size={22} className="group-hover:scale-110 transition-transform" /> 
                        Print
