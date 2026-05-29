@@ -439,7 +439,7 @@ export default function App() {
              </div>
              <form onSubmit={(e) => {
                  e.preventDefault();
-                 const user = users.find((u: any) => u.username === loginForm.username && u.password === loginForm.password);
+                 const user = users.find((u: any) => u.username.toLowerCase() === loginForm.username.toLowerCase() && u.password === loginForm.password);
                  if (user) {
                      setCurrentUser(user);
                      setActiveView('computation');
@@ -599,7 +599,7 @@ export default function App() {
                    <form onSubmit={(e) => {
                       e.preventDefault();
                       if (!newUser.username || !newUser.password) return;
-                      if (users.find((u:any) => u.username === newUser.username)) {
+                      if (users.find((u:any) => u.username.toLowerCase() === newUser.username.toLowerCase())) {
                          alert('Username already exists');
                          return;
                       }
