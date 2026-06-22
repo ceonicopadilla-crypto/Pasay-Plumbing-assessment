@@ -146,6 +146,7 @@ export default function App() {
         { username: 'BDelmo', password: 'Engr002', role: 'user', assessorName: 'Engr.Delmo' },
         { username: 'MSantos', password: 'Eval001', role: 'user', assessorName: 'M.Santos' },
         { username: 'LSoro', password: 'Eval001', role: 'user', assessorName: 'L.Soro' },
+        { username: 'engrojt', password: 'ojt0001', role: 'user', assessorName: 'OJT' },
     ];
 
     let hasChanges = false;
@@ -155,6 +156,13 @@ export default function App() {
     if (lsorroIndex !== -1) {
         parsed[lsorroIndex].username = 'LSoro';
         parsed[lsorroIndex].assessorName = 'L.Soro';
+        hasChanges = true;
+    }
+
+    // Fix existing engrojt assessorName
+    const ojtIndex = parsed.findIndex((u: any) => u.username === 'engrojt');
+    if (ojtIndex !== -1 && parsed[ojtIndex].assessorName !== 'OJT') {
+        parsed[ojtIndex].assessorName = 'OJT';
         hasChanges = true;
     }
 
